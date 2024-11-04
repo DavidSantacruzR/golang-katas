@@ -19,5 +19,9 @@ func TestCeasarEncodingShiftEven(t *testing.T) {
 }
 
 func TestCeasarDecoding(t *testing.T) {
-
+	result := CeasarDecoding("gdylg", 3)
+	expected := "david"
+	if result != expected {
+		t.Errorf("CeasarDecoding: got %v; want %v", result, expected)
+	}
 }

@@ -11,4 +11,5 @@ func main() {
 	fmt.Println(fibonacci.GetFibonacciSequence(4))
 	fmt.Println(palindrome.IsPalindrome("level"))
 	fmt.Println(cipher.CeasarEncoding("david", 4))
+	fmt.Println(cipher.CeasarDecoding("gdylg", 3))
 }
