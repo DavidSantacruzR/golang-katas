@@ -1,15 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"golang/cipher"
-	"golang/fibonacci"
-	"golang/palindrome"
+	"golang/redis"
 )
 
 func main() {
-	fmt.Println(fibonacci.GetFibonacciSequence(4))
-	fmt.Println(palindrome.IsPalindrome("level"))
-	fmt.Println(cipher.CeasarEncoding("david", 4))
-	fmt.Println(cipher.CeasarDecoding("gdylg", 3))
+	server := redis.Server{}
+	server.New("127.0.0.1", 3000)
+	client := redis.Client{}
+	client.New("127.0.0.1", 3000)
+	client.ReadValue("Juan es un aspero")
 }

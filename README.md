@@ -1,10 +1,17 @@
 <h1>Coding Katas for Golang</h1>
 <h2>Exercises</h2>
 
+<h3>Basic:</h3>
+
 <ul>
 <li>Create a function that returns a Fibonacci sequence up to N.</li>
 <li>Create a function that checks if a word is a palindrome</li>
 <li>Create a function that encrypt/decrypt using Caesar algorithm</li>
+</ul>
+
+<h3>Medium:</h3>
+<ul>
+<li>Build your own redis server with SET, GET commands.</li>
 </ul>
 
 Include test cases for each of the exercises.
