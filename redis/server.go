@@ -6,6 +6,14 @@ import (
 	"strconv"
 )
 
+/*
+TODO: Implement the redis protocol.
+TODO: Handle memory storing, and retrieval of values (GET, PUT).
+TODO: Error handling with exceptions and panics!
+TODO: Manage byte length on messages to either write or read.
+TODO: Distributed memory instances.
+*/
+
 type Ctx struct {
 	key  string
 	text string
