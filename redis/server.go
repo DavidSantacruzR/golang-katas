@@ -4,24 +4,18 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 )
 
 /*
 TODO: Implement the redis protocol.
-TODO: Handle memory storing, and retrieval of values (GET, PUT).
 TODO: Error handling with exceptions and panics!
-TODO: Manage byte length on messages to either write or read.
 TODO: Distributed memory instances.
 */
 
-type Ctx struct {
-	key  string
-	text string
-	data string
-}
-
 type Server struct {
 	server net.Listener
+	db     map[string]string
 }
 
 func (srv *Server) New(addr string, port int) *Server {
@@ -30,6 +24,8 @@ func (srv *Server) New(addr string, port int) *Server {
 	if serverErr != nil {
 		fmt.Println("Could not start redis server")
 	}
+	srv.db = make(map[string]string)
+	fmt.Println("In memory db initialised.")
 	for {
 		connection, err := listener.Accept()
 		if err != nil {
@@ -41,15 +37,24 @@ func (srv *Server) New(addr string, port int) *Server {
 
 func (srv *Server) handleConnection(conn net.Conn) {
 	defer srv.closeConnection(conn)
-	fmt.Println("Handling connection data.")
 	buffer := make([]byte, 1024)
 	for {
 		_, err := conn.Read(buffer)
 		if err != nil {
 			return
 		}
-		fmt.Printf("Received data: %s\n", string(buffer))
-		conn.Write([]byte("moya"))
+		instructions := strings.Split(string(buffer), "\r\n")
+		if instructions[2] == "GET" {
+			response := srv.fetchKeyFromDb(instructions[len(instructions)-2])
+			_, _ = conn.Write([]byte(response))
+			return
+		}
+		if instructions[2] == "SET" {
+			/*TODO: Implement the complete SET method.*/
+			response := srv.pushKeyToDb("test", "test")
+			_, _ = conn.Write([]byte(response))
+			return
+		}
 	}
 }
 
@@ -59,4 +64,19 @@ func (srv *Server) closeConnection(conn net.Conn) {
 		fmt.Printf("Unable to close the current connection.")
 		return
 	}
+}
+
+func (srv *Server) fetchKeyFromDb(key string) string {
+	fmt.Println(key)
+	value, exists := srv.db[key]
+	if exists {
+		return value
+	} else {
+		return fmt.Sprintf("-WRONGKEY No value for key %s", key)
+	}
+}
+
+func (srv *Server) pushKeyToDb(key string, value string) string {
+	fmt.Println("Storing key, value pair.", key, value)
+	return "done."
 }

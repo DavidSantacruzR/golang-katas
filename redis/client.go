@@ -16,12 +16,12 @@ func (c *Client) New(addr string, port int) {
 }
 
 func (c *Client) GetKey(key string) string {
+	command := fmt.Sprintf("*2\r\n$3\r\nGET\r\n$%d\r\n%s\r\n", len(key), key)
 	var conn, _ = net.Dial("tcp", c.address)
 	defer c.closeClientConnection(conn)
-	fmt.Println("Byte representation", []byte(key))
-	_, err := conn.Write([]byte(key))
+	_, err := conn.Write([]byte(command))
 	if err != nil {
-		fmt.Println("Could not get key", err)
+		fmt.Println("Unable to execute instruction", command, err)
 	}
 	buffer := make([]byte, 1024)
 	value, err := conn.Read(buffer)
@@ -33,6 +33,7 @@ func (c *Client) GetKey(key string) string {
 }
 
 func (c *Client) closeClientConnection(conn net.Conn) {
+	/*TODO: Implement the redis parser set command.*/
 	err := conn.Close()
 	if err != nil {
 		fmt.Printf("Unable to close the recently opened connection.")
