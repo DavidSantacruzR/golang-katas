@@ -7,12 +7,6 @@ import (
 	"strings"
 )
 
-/*
-TODO: Implement the redis protocol.
-TODO: Error handling with exceptions and panics!
-TODO: Distributed memory instances.
-*/
-
 type Server struct {
 	server net.Listener
 	db     map[string]string
@@ -50,8 +44,7 @@ func (srv *Server) handleConnection(conn net.Conn) {
 			return
 		}
 		if instructions[2] == "SET" {
-			/*TODO: Implement the complete SET method.*/
-			response := srv.pushKeyToDb("test", "test")
+			response := srv.pushKeyToDb(instructions[4], instructions[6])
 			_, _ = conn.Write([]byte(response))
 			return
 		}
@@ -67,7 +60,6 @@ func (srv *Server) closeConnection(conn net.Conn) {
 }
 
 func (srv *Server) fetchKeyFromDb(key string) string {
-	fmt.Println(key)
 	value, exists := srv.db[key]
 	if exists {
 		return value
@@ -77,6 +69,6 @@ func (srv *Server) fetchKeyFromDb(key string) string {
 }
 
 func (srv *Server) pushKeyToDb(key string, value string) string {
-	fmt.Println("Storing key, value pair.", key, value)
-	return "done."
+	srv.db[key] = value
+	return "+OK\r\n"
 }
