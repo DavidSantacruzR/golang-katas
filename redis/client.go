@@ -20,8 +20,10 @@ func (c *Client) GetKey(key string) string {
 	return c.executeCommand(command)
 }
 
-func (c *Client) SetValue(key string, value string) string {
-	command := fmt.Sprintf("*2\r\n$3\r\nSET\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n", len(key), key, len(value), value)
+func (c *Client) SetValue(key string, value string, expirationSeconds int64) string {
+	command := fmt.Sprintf(
+		"*2\r\n$3\r\nSET\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$2\r\nEX\r\n$2\r\n%d\r\n",
+		len(key), key, len(value), value, expirationSeconds)
 	return c.executeCommand(command)
 }
 

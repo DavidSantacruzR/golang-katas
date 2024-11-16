@@ -5,11 +5,24 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
+
+type Record struct {
+	value string
+	TTL   int64
+}
+
+func NewRecord(value string, TTL int64) Record {
+	return Record{
+		value: value,
+		TTL:   TTL,
+	}
+}
 
 type Server struct {
 	server net.Listener
-	db     map[string]string
+	db     map[string]Record
 }
 
 func (srv *Server) New(addr string, port int) *Server {
@@ -18,7 +31,7 @@ func (srv *Server) New(addr string, port int) *Server {
 	if serverErr != nil {
 		fmt.Println("Could not start redis server")
 	}
-	srv.db = make(map[string]string)
+	srv.db = make(map[string]Record)
 	fmt.Println("In memory db initialised.")
 	for {
 		connection, err := listener.Accept()
@@ -44,7 +57,11 @@ func (srv *Server) handleConnection(conn net.Conn) {
 			return
 		}
 		if instructions[2] == "SET" {
-			response := srv.pushKeyToDb(instructions[4], instructions[6])
+			timeToLive, parseErr := strconv.ParseInt(instructions[10], 10, 64)
+			if parseErr != nil {
+				timeToLive = 0
+			}
+			response := srv.pushKeyToDb(instructions[4], instructions[6], timeToLive)
 			_, _ = conn.Write([]byte(response))
 			return
 		}
@@ -60,15 +77,34 @@ func (srv *Server) closeConnection(conn net.Conn) {
 }
 
 func (srv *Server) fetchKeyFromDb(key string) string {
-	value, exists := srv.db[key]
+	record, exists := srv.db[key]
 	if exists {
-		return value
+		expiredKey := srv.validateExpiration(record)
+		if expiredKey {
+			srv.deleteKeyFromDb(key)
+			return fmt.Sprintf("-EXPIREDKEY Key already expired %s", key)
+		}
+		return record.value
 	} else {
 		return fmt.Sprintf("-WRONGKEY No value for key %s", key)
 	}
 }
 
-func (srv *Server) pushKeyToDb(key string, value string) string {
-	srv.db[key] = value
+func (srv *Server) pushKeyToDb(key string, value string, ttl int64) string {
+	srv.db[key] = NewRecord(value, time.Now().Unix()+ttl)
 	return "+OK\r\n"
+}
+
+func (srv *Server) validateExpiration(record Record) bool {
+	if record.TTL == 0 {
+		return false
+	}
+	if time.Now().Unix() > record.TTL {
+		return true
+	}
+	return false
+}
+
+func (srv *Server) deleteKeyFromDb(key string) {
+	delete(srv.db, key)
 }
