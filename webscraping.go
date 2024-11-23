@@ -10,4 +10,5 @@ func main() {
 	vehiclePenalties := webscraping.FetchPenalties("ABC123", "123456789")
 	fmt.Printf("\n%s\n", vehicleDetails)
 	fmt.Printf("\n%s\n", vehiclePenalties)
+	webscraping.RunApi()
 }

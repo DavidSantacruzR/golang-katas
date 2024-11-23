@@ -1,7 +1,6 @@
 package webscraping
 
 import (
-	"encoding/json"
 	"math/rand"
 	"time"
 )
@@ -36,7 +35,7 @@ type ResponseObject struct {
 	DrivingState      string
 }
 
-func FetchVehicleDetails(plate string, ownerId string) string {
+func FetchVehicleDetails(plate string, ownerId string) ResponseObject {
 	lowerBoundLimit := 1
 	upperBoundLimit := 5
 	serverProcessingTimeInSec := rand.Intn(upperBoundLimit-lowerBoundLimit) + lowerBoundLimit
@@ -57,9 +56,5 @@ func FetchVehicleDetails(plate string, ownerId string) string {
 		DrivingState:      "CAPITAL_DISTRICT",
 	}
 	time.Sleep(duration)
-	jsonResponse, jsonErr := json.Marshal(details)
-	if jsonErr != nil {
-		return ""
-	}
-	return string(jsonResponse)
+	return details
 }

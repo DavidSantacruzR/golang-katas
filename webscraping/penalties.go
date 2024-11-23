@@ -1,7 +1,7 @@
 package webscraping
 
 import (
-	"encoding/json"
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -33,7 +33,7 @@ type ResponsePenaltiesObject struct {
 	Penalties []Penalty
 }
 
-func FetchPenalties(plate string, ownerId string) string {
+func FetchPenalties(plate string, ownerId string) ResponsePenaltiesObject {
 	lowerBoundLimit := 1
 	upperBoundLimit := 5
 	serverProcessingTimeInSec := rand.Intn(upperBoundLimit-lowerBoundLimit) + lowerBoundLimit
@@ -47,18 +47,15 @@ func FetchPenalties(plate string, ownerId string) string {
 	}
 	for i := 0; i < ticketsNumber; i++ {
 		issuanceDays := rand.Intn(365)
-		ticketType := rand.Intn(3)
+		ticketType := rand.Intn(2)
 		currentTicket := Penalty{
 			IssuedOn: time.Now().AddDate(0, 0, -issuanceDays).Format(time.RFC3339),
 			Amount:   math.Round((1 + rand.Float64()) * 100000),
 			Reason:   penalty[PenaltyType(ticketType)],
 		}
-		details.Penalties = append(details.Penalties, currentTicket)
+		fmt.Println(currentTicket)
+		details.Penalties[i] = currentTicket
 	}
 	time.Sleep(duration)
-	jsonResponse, jsonErr := json.Marshal(details)
-	if jsonErr != nil {
-		return ""
-	}
-	return string(jsonResponse)
+	return details
 }
