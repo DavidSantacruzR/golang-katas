@@ -1,7 +1,6 @@
 package webscraping
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -53,7 +52,6 @@ func FetchPenalties(plate string, ownerId string) ResponsePenaltiesObject {
 			Amount:   math.Round((1 + rand.Float64()) * 100000),
 			Reason:   penalty[PenaltyType(ticketType)],
 		}
-		fmt.Println(currentTicket)
 		details.Penalties[i] = currentTicket
 	}
 	time.Sleep(duration)

@@ -1,7 +1,6 @@
 package webscraping
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -44,12 +43,10 @@ func fetchVehicleData(c *gin.Context) {
 	go func() {
 		vehicleDetails := FetchVehicleDetails(body.Plate, body.OwnerId)
 		resultChannel <- Result{Field: "Details", Value: vehicleDetails}
-		fmt.Println("FetchVehicleDetails executed!")
 	}()
 	go func() {
 		penaltiesDetails := FetchPenalties(body.Plate, body.OwnerId)
 		resultChannel <- Result{Field: "Penalties", Value: penaltiesDetails}
-		fmt.Println("FetchPenalties executed!")
 	}()
 	for i := 0; i < 2; i++ {
 		result := <-resultChannel

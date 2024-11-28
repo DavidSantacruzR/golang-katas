@@ -1,6 +1,7 @@
 package webscraping
 
 import (
+	"math"
 	"math/rand"
 	"time"
 )
@@ -48,7 +49,7 @@ func FetchVehicleDetails(plate string, ownerId string) ResponseObject {
 		Insurance: Insurance{
 			ValidUntil: time.Now().AddDate(0, 0, -randomInsuranceValidDate).Format(time.RFC3339),
 			Issued:     time.Now().AddDate(-1, 0, 0).Format(time.RFC3339),
-			Amount:     rand.Float64(),
+			Amount:     math.Round((1 + rand.Float64()) * 100000),
 			Insurer:    insurer[InsuranceCompany(randomInsurer)],
 		},
 		ValidLicense:      true,
