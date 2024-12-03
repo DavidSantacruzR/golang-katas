@@ -1,36 +1,36 @@
-package client
+package connection
 
-type ConnectionPool struct {
+type Pool struct {
 	connections     chan *Connection
 	liveConnections int
 }
 
-func StartConnectionPool(connections int) (*ConnectionPool, error) {
+func StartConnectionPool(connections int) (*Pool, error) {
 	connectionsLimit := 10
 	if connections > connectionsLimit {
 		return nil, &MaxConnectionLimitExceededError{connections: connections}
 	}
 	channel := make(chan *Connection, connections)
-	pool := &ConnectionPool{connections: channel, liveConnections: 0}
+	pool := &Pool{connections: channel, liveConnections: 0}
 	for i := 0; i < connections; i++ {
-		pool.connections <- &Connection{}
+		pool.connections <- NewConnection()
 		pool.liveConnections++
 	}
 	return pool, nil
 }
 
-func (cp *ConnectionPool) Fetch() *Connection {
+func (cp *Pool) Fetch() *Connection {
 	var conn *Connection
 	select {
 	case conn = <-cp.connections:
 		return conn
 	default:
-		conn = &Connection{}
+		conn = NewConnection()
 		cp.connections <- conn
 		return conn
 	}
 }
 
-func (cp *ConnectionPool) Release(conn *Connection) {
+func (cp *Pool) Release(conn *Connection) {
 	cp.connections <- conn
 }
