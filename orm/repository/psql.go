@@ -12,7 +12,9 @@ type PSQLRepository struct {
 func (p *PSQLRepository) Get(model any, fields map[string]any) Recordset {
 	conn := p.pool.Fetch()
 	conn.ExecuteQuery(fmt.Sprintf("SELECT %V FROM %V", fields, model))
-	panic("finish implementing me")
+	p.pool.Release(conn)
+	/*TODO: Finish implementing the method.*/
+	return Recordset{}
 }
 
 func (p *PSQLRepository) Create(data map[string]any) OperationResult {
