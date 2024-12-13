@@ -1,3 +1,5 @@
 package models
 
-type Model struct{}
+type Model interface {
+	GetFields() []string
+}

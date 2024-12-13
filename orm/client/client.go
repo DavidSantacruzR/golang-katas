@@ -2,6 +2,7 @@ package client
 
 import (
 	"golang/orm/connection"
+	"golang/orm/models"
 	"golang/orm/repository"
 )
 
@@ -9,14 +10,10 @@ type DbClient struct {
 	repository repository.Base
 }
 
-func NewDbClient(connections int) DbClient {
-	pool, _ := connection.StartConnectionPool(connections)
-	if pool == nil {
-		panic("connection pool is nil")
-	}
-	return DbClient{repository.NewPsqlRepository(pool)}
+func NewDbClient(connDetails connection.Connection) DbClient {
+	return DbClient{repository.NewPsqlRepository(connDetails.ConnectionString())}
 }
 
-func (db *DbClient) Get(model any, fields map[string]any) repository.Recordset {
-	return db.repository.Get(model, fields)
+func (db *DbClient) Get(table string, model models.Model) repository.Recordset {
+	return db.repository.Get(table, model)
 }
