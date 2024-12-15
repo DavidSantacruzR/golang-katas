@@ -37,5 +37,5 @@ func main() {
 		DbName:   "watchdog",
 	})
 	data, _ := handlers.Filter(&db, "transit_tickets", &Tickets{})
-	fmt.Println(data)
+	fmt.Println("Record:", data)
 }
