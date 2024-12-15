@@ -4,7 +4,11 @@ import "golang/orm/models"
 
 type Recordset struct {
 	IsSuccessful bool
-	data         map[string]any
+	data         []map[string]any
+}
+
+func (r *Recordset) AppendRow(record map[string]any) {
+	r.data = append(r.data, record)
 }
 
 type OperationResult struct {

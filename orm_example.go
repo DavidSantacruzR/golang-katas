@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/lib/pq"
 	"golang/orm/client"
 	"golang/orm/connection"
@@ -13,6 +14,9 @@ import (
 type Tickets struct {
 	Id    sql.NullString
 	Plate sql.NullString
+	Year  sql.NullString
+	Value sql.NullFloat64
+	City  sql.NullString
 }
 
 func (t *Tickets) GetFields() []string {
@@ -25,19 +29,6 @@ func (t *Tickets) GetFields() []string {
 }
 
 func main() {
-	/*db, _ := sql.Open("postgres", "postgresql://watchdog:watchdog@localhost/watchdog?sslmode=disable")
-	response, _ := db.Query("select id, plate from transit_tickets")
-	var id sql.NullString
-	var plate sql.NullString
-	defer response.Close()
-	for response.Next() {
-		err := response.Scan(&id, &plate)
-		fmt.Println(id.String, plate.String)
-		if err != nil {
-			log.Printf("Failed to scan row: %v", err)
-		}
-		fmt.Println()
-	}*/
 	db := client.NewDbClient(connection.Connection{
 		Host:     "localhost",
 		Port:     5432,
@@ -45,5 +36,6 @@ func main() {
 		Password: "watchdog",
 		DbName:   "watchdog",
 	})
-	_, _ = handlers.Filter(&db, "transit_tickets", &Tickets{})
+	data, _ := handlers.Filter(&db, "transit_tickets", &Tickets{})
+	fmt.Println(data)
 }

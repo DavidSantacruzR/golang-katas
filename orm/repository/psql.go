@@ -16,6 +16,7 @@ type PSQLRepository struct {
 }
 
 func (p *PSQLRepository) Get(table string, model models.Model) Recordset {
+	record := Recordset{}
 	fields := strings.Join(model.GetFields(), ", ")
 	response, _ := p.pool.Query(fmt.Sprintf("SELECT %s FROM %s", fields, table))
 	defer func(response *sql.Rows) {
@@ -26,6 +27,7 @@ func (p *PSQLRepository) Get(table string, model models.Model) Recordset {
 	}(response)
 	result := make([]interface{}, len(model.GetFields()))
 	for response.Next() {
+		row := make(map[string]any, len(model.GetFields()))
 		for i := range result {
 			result[i] = new(interface{})
 		}
@@ -33,26 +35,16 @@ func (p *PSQLRepository) Get(table string, model models.Model) Recordset {
 		for i := range result {
 			v := reflect.Indirect(reflect.ValueOf(result[i]))
 			value := v.Interface()
-			if byteSlice, ok := value.([]byte); ok {
-				uuidString := string(byteSlice) // Convert byte slice to string
-				uuidValue, err := uuid.Parse(uuidString)
-				if err != nil {
-					log.Printf("Failed to parse UUID: %v", err)
-				} else {
-					fmt.Println(uuidValue.String())
-				}
-			} else if nullString, ok := value.(*sql.NullString); ok {
-				fmt.Println(nullString.String)
-			} else {
-				fmt.Println(value)
-			}
+			fieldValue := p.ValidateType(value)
+			row[model.GetFields()[i]] = fieldValue
 		}
+		record.AppendRow(row)
 		if scanErr != nil {
 			log.Printf("Failed to scan row: %v", scanErr)
 		}
-		fmt.Println()
 	}
-	return Recordset{}
+	record.IsSuccessful = true
+	return record
 }
 
 func (p *PSQLRepository) Create(data map[string]any) OperationResult {
@@ -68,6 +60,23 @@ func (p *PSQLRepository) Update(id int, data map[string]any) OperationResult {
 func (p *PSQLRepository) Delete(id int) OperationResult {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (p *PSQLRepository) ValidateType(value any) any {
+	if byteSlice, ok := value.([]byte); ok {
+		uuidString := string(byteSlice) // Convert byte slice to string
+		uuidValue, err := uuid.Parse(uuidString)
+		if err != nil {
+			log.Printf("Failed to parse UUID: %v", err)
+		} else {
+			return uuidValue.String()
+		}
+	} else if nullString, ok := value.(*sql.NullString); ok {
+		return nullString.String
+	} else {
+		return value
+	}
+	return value
 }
 
 func NewPsqlRepository(connUrl string) Base {
